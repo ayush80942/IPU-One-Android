@@ -12,7 +12,7 @@ Results, notices, and document collection — without ever touching the universi
 ![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white)
 ![Min SDK](https://img.shields.io/badge/minSdk-30-informational)
 ![Target SDK](https://img.shields.io/badge/targetSdk-36-informational)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red)
 
 </div>
 
