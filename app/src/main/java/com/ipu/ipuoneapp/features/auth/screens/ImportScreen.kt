@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -22,15 +22,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ipu.ipuoneapp.core.ui.components.AppTextField
 import com.ipu.ipuoneapp.core.ui.components.PrimaryButton
+import com.ipu.ipuoneapp.core.ui.components.Header
+import com.ipu.ipuoneapp.core.ui.components.Footer
 import com.ipu.ipuoneapp.features.auth.ImportViewModel
 import com.ipu.ipuoneapp.features.auth.ImportViewModelFactory
 
@@ -55,6 +55,7 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -83,95 +84,62 @@ fun ImportScreen(
     if (viewModel.error != null) {
         androidx.compose.ui.window.Dialog(onDismissRequest = { viewModel.error = null }) {
             androidx.compose.material3.Card(
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = androidx.compose.material3.CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                elevation = androidx.compose.material3.CardDefaults.cardElevation(
+                    defaultElevation = 8.dp
+                ),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.fillMaxWidth().padding(28.dp)
                 ) {
+
                     Text(
                         text = "Login Error",
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = typography.headlineSmall,
+                        textAlign = TextAlign.Start,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
                     Text(
                         text = viewModel.error!!,
-                        color = androidx.compose.ui.graphics.Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        style = typography.headlineSmall
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    androidx.compose.material3.TextButton(
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    PrimaryButton(
+                        text = "Ok!",
                         onClick = { viewModel.error = null }
-                    ) {
-                        Text(
-                            text = "OK",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                    )
                 }
             }
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(WindowInsets.systemBars.asPaddingValues())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.systemBars.asPaddingValues())
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
         ) {
         // 🔝 HEADER
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (isRefresh && onBack != null) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            }
-
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "IPU One",
-                    style = typography.headlineMedium.copy(
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    "STUDENT PORTAL",
-                    style = typography.labelMedium.copy(
-                        letterSpacing = 2.sp
-                    )
-                )
-            }
-        }
+        Header(onBack = if (isRefresh) onBack else null)
 
         Spacer(Modifier.height(60.dp))
 
@@ -187,7 +155,7 @@ fun ImportScreen(
 
         Text(
             text = if (isRefresh) "Authenticate to fetch your latest academic results from the university portal."
-            else "This is a one-time import of your academic data from the university exam portal using your credentials.",
+            else "This is a one-time import of your academic data from the university result portal using your credentials.",
             modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
             textAlign = TextAlign.Center,
             style = typography.bodyLarge.copy(color = Color.Gray)
@@ -207,9 +175,9 @@ fun ImportScreen(
         Spacer(modifier = Modifier.height(8.dp))
         AppTextField(
             value = enroll,
-            onValueChange = { 
+            onValueChange = {
                 if (!isRefresh && it.length <= 11 && it.all { char -> char.isDigit() }) {
-                    enroll = it 
+                    enroll = it
                 }
             },
             placeholder = "Enter your enrollment number",
@@ -255,66 +223,128 @@ fun ImportScreen(
             )
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
 
-            // 🧾 INPUT FIELD (takes most space)
-            AppTextField(
-                value = captcha,
-                onValueChange = { captcha = it },
-                placeholder = "Enter Captcha",
-                modifier = Modifier.weight(1f),
-                leadingIcon = null   // ✅ no icon here
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // 🔄 REFRESH BUTTON
-            Box(
+        if (viewModel.captchaError != null) {
+            // 🚫 PORTAL UNREACHABLE — calm inline state, rest of the screen stays untouched
+            Row(
                 modifier = Modifier
-                    .size(56.dp)
+                    .fillMaxWidth()
                     .background(
-                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.error.copy(alpha = 0.08f),
                         RoundedCornerShape(16.dp)
                     )
-                    .clickable {
-                        viewModel.fetchCaptcha()
-                    },
-                contentAlignment = Alignment.Center
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(22.dp)
                 )
-            }
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-            // 🖼️ CAPTCHA IMAGE
-            Box(
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(40.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                base64String?.let { base64 ->
-                    val imageBytes = Base64.decode(base64, Base64.DEFAULT)
-                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                Text(
+                    text = viewModel.captchaError!!,
+                    modifier = Modifier.weight(1f),
+                    style = typography.bodySmall.copy(color = Color.DarkGray)
+                )
 
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .clickable(enabled = !viewModel.captchaLoading) { viewModel.fetchCaptcha() },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        "Retry",
+                        style = typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                // 🧾 INPUT FIELD (takes most space)
+                AppTextField(
+                    value = captcha,
+                    onValueChange = { captcha = it },
+                    placeholder = "Enter Captcha",
+                    modifier = Modifier.weight(1f),
+                    leadingIcon = null   // ✅ no icon here
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // 🔄 REFRESH BUTTON
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface,
+                            RoundedCornerShape(16.dp)
+                        )
+                        .clickable(enabled = !viewModel.captchaLoading) {
+                            viewModel.fetchCaptcha()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (viewModel.captchaLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // 🖼️ CAPTCHA IMAGE
+                Box(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    base64String?.let { base64 ->
+                        val imageBytes = Base64.decode(base64, Base64.DEFAULT)
+                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        val isFormValid = enroll.length == 11 && password.isNotBlank() && captcha.isNotBlank()
+        val isFormValid = enroll.length == 11 && password.isNotBlank() && captcha.isNotBlank() &&
+            viewModel.sessionId != null
 
         PrimaryButton(
             text = if (viewModel.loading) {
@@ -338,18 +368,6 @@ fun ImportScreen(
         } // Close inner Column
 
         // 🔻 Footer
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Need help with your account?", color = Color.Gray)
-            Spacer(modifier= Modifier.height(2.dp))
-            Text(
-                "Contact Student Cell",
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
+        Footer()
     }
 }

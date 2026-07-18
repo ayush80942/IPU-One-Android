@@ -1,6 +1,5 @@
 package com.ipu.ipuoneapp.features.auth.screens
 
-import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -22,9 +21,9 @@ import androidx.compose.ui.unit.sp
 import com.ipu.ipuoneapp.R
 import com.ipu.ipuoneapp.core.ui.components.PrimaryButton
 import com.ipu.ipuoneapp.core.ui.components.AppTextField
-import androidx.core.net.toUri
+import com.ipu.ipuoneapp.core.ui.components.Header
+import com.ipu.ipuoneapp.core.ui.components.Footer
 import com.ipu.ipuoneapp.features.auth.AuthViewModel
-import com.ipu.ipuoneapp.core.config.AppConfig
 
 @Composable
 fun AuthScreen(onLoginSuccess: () -> Unit = {} , onSendOtp: (String) -> Unit) {
@@ -37,31 +36,12 @@ fun AuthScreen(onLoginSuccess: () -> Unit = {} , onSendOtp: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(WindowInsets.safeDrawing.asPaddingValues())
+            .padding(WindowInsets.systemBars.asPaddingValues())
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
 
         // 🔝 HEADER
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "IPU One",
-                style = typography.headlineMedium.copy(
-                    color = MaterialTheme.colorScheme.primary
-                )
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                "STUDENT PORTAL",
-                style = typography.labelMedium.copy(
-                    letterSpacing = 2.sp
-                )
-            )
-        }
+        Header()
 
         Spacer(modifier = Modifier.height(48.dp))
 
@@ -141,25 +121,7 @@ fun AuthScreen(onLoginSuccess: () -> Unit = {} , onSendOtp: (String) -> Unit) {
             text = "Continue with Google",
             icon = painterResource(id = R.drawable.ic_google),
             onClick = {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    AppConfig.GOOGLE_OAUTH_URL.toUri()
-                )
-                context.startActivity(intent)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OAuthButton(
-            text = "Continue with GitHub",
-            icon = painterResource(id = R.drawable.ic_github),
-            onClick = {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    AppConfig.GITHUB_OAUTH_URL.toUri()
-                )
-                context.startActivity(intent)
+                viewModel.signInWithGoogle(context)
             }
         )
 
@@ -181,18 +143,7 @@ fun AuthScreen(onLoginSuccess: () -> Unit = {} , onSendOtp: (String) -> Unit) {
         Spacer(modifier = Modifier.weight(1f))
 
         // 🔻 FOOTER
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Need help with your account?", color = Color.Gray)
-            Spacer(modifier= Modifier.height(2.dp))
-            Text(
-                "Contact Student Cell",
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        Footer()
     }
 }
 

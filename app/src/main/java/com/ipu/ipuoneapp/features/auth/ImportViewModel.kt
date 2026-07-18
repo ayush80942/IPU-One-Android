@@ -15,6 +15,10 @@ import org.json.JSONObject
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
+
+private const val PORTAL_UNREACHABLE_MESSAGE =
+    "We couldn't reach the university result portal. Please try again later, or contact the Exam Branch / Student Cell if this continues."
 
 class ImportViewModel(
     private val context: Context
@@ -24,22 +28,40 @@ class ImportViewModel(
 
     var captchaImage by mutableStateOf<String?>(null)
     var sessionId by mutableStateOf<String?>(null)
+
+    // Captcha loading/error state is kept separate from the import/login state below —
+    // a background captcha refresh should never make the Import button look like it's submitting.
+    var captchaLoading by mutableStateOf(false)
+    var captchaError by mutableStateOf<String?>(null)
+
     var loading by mutableStateOf(false)
     var error by mutableStateOf<String?>(null)
 
     fun fetchCaptcha() {
         viewModelScope.launch {
-            loading = true
+            captchaLoading = true
+            captchaError = null
             try {
                 val res = api.getCaptcha()
                 if (res.success) {
                     captchaImage = res.captchaImage
                     sessionId = res.sessionId
+                } else {
+                    captchaImage = null
+                    sessionId = null
+                    captchaError = res.message ?: PORTAL_UNREACHABLE_MESSAGE
                 }
+            } catch (e: IOException) {
+                // Network-level failure (timeout, unreachable, DNS, etc.) — not the user's fault.
+                captchaImage = null
+                sessionId = null
+                captchaError = PORTAL_UNREACHABLE_MESSAGE
             } catch (e: Exception) {
-                error = e.message
+                captchaImage = null
+                sessionId = null
+                captchaError = PORTAL_UNREACHABLE_MESSAGE
             }
-            loading = false
+            captchaLoading = false
         }
     }
 
@@ -51,12 +73,13 @@ class ImportViewModel(
     ) {
         viewModelScope.launch {
             loading = true
-            val currentSession = sessionId
-            if (currentSession == null) {
-                error = "Captcha not loaded"
-                return@launch
-            }
             try {
+                val currentSession = sessionId
+                if (currentSession == null) {
+                    error = "Captcha not loaded. Please wait for it to load or tap retry."
+                    return@launch
+                }
+
                 val res = api.importResult(
                     ImportRequest(
                         username,
@@ -86,10 +109,15 @@ class ImportViewModel(
                     error = "Failed to import. Please try again."
                 }
                 fetchCaptcha() // auto refresh captcha on error
+            } catch (e: IOException) {
+                // Network-level failure talking to our own backend (not the university portal
+                // login attempt itself, which already reports its own unreachable-portal message).
+                error = PORTAL_UNREACHABLE_MESSAGE
             } catch (e: Exception) {
                 error = e.message ?: "An unexpected error occurred"
+            } finally {
+                loading = false
             }
-            loading = false
         }
     }
 }

@@ -3,6 +3,7 @@ package com.ipu.ipuoneapp.core.network
 import com.ipu.ipuoneapp.data.model.auth.AuthResponse
 import com.ipu.ipuoneapp.data.model.auth.AuthStatusResponse
 import com.ipu.ipuoneapp.data.model.auth.CaptchaResponse
+import com.ipu.ipuoneapp.data.model.auth.GoogleLoginRequest
 import com.ipu.ipuoneapp.data.model.auth.ImportRequest
 import com.ipu.ipuoneapp.data.model.auth.ImportResponse
 import com.ipu.ipuoneapp.data.model.auth.MessageResponse
@@ -17,8 +18,10 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("login/oauth2/code/github")
-    suspend fun loginWithGithub(): AuthResponse
+    @POST("api/auth/google")
+    suspend fun loginWithGoogle(
+        @Body request: GoogleLoginRequest
+    ): AuthResponse
 
     @POST("api/auth/send-otp")
     suspend fun sendOtp(

@@ -7,12 +7,8 @@ object AppConfig {
     const val BASE_URL = "http://tmsk864q5tetm736i55qlyi0.213.210.37.18.sslip.io/"
 
     /**
-     * Endpoint for initiating GitHub OAuth.
+     * Web OAuth client ID used as the audience for native Google Sign-In (Credential Manager).
+     * This is the same client ID the backend validates ID tokens against — it is not a secret.
      */
-    const val GITHUB_OAUTH_URL = "${BASE_URL}oauth2/authorization/github"
-
-    /**
-     * Endpoint for initiating Google OAuth.
-     */
-    const val GOOGLE_OAUTH_URL = "${BASE_URL}oauth2/authorization/google"
+    const val GOOGLE_WEB_CLIENT_ID = "983536591953-5veu6443bvjb5ibv7tndr9veejnf9k2a.apps.googleusercontent.com"
 }
