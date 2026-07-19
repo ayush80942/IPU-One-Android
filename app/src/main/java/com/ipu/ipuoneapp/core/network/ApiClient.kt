@@ -1,6 +1,7 @@
 package com.ipu.ipuoneapp.core.network
 
 import android.content.Context
+import coil.ImageLoader
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -29,5 +30,24 @@ object ApiClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiService::class.java)
+    }
+
+    /**
+     * Document/profile files are served from authenticated endpoints (e.g. GET
+     * /api/documents/{id}/file), not embedded as base64 in JSON — so images loaded via Coil
+     * need the same bearer token attached as Retrofit calls.
+     */
+    fun provideImageLoader(context: Context): ImageLoader {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(context))
+            .build()
+
+        return ImageLoader.Builder(context)
+            .okHttpClient(client)
+            .build()
+    }
+
+    fun resolveUrl(path: String): String {
+        return if (path.startsWith("http")) path else BASE_URL.trimEnd('/') + "/" + path.trimStart('/')
     }
 }

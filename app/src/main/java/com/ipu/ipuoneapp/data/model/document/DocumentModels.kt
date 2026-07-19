@@ -15,7 +15,7 @@ data class DocumentResponseDto(
     val semester: String?,
     val examType: String?,
     val nocDuration: String?,
-    val imageBase64: String,
+    val fileUrl: String,
     val submittedAt: String,
     val updatedAt: String
 )

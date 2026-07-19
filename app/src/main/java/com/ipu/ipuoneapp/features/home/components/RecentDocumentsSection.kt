@@ -1,7 +1,5 @@
 package com.ipu.ipuoneapp.features.home.components
 
-import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,13 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.rememberAsyncImagePainter
+import com.ipu.ipuoneapp.core.network.ApiClient
 import com.ipu.ipuoneapp.data.model.document.DocumentResponseDto
 import com.ipu.ipuoneapp.features.services.collect.CollectViewModel
 import java.text.SimpleDateFormat
@@ -35,12 +34,13 @@ fun RecentDocumentsSection(
 ) {
     val context = LocalContext.current
     val viewModel = remember { CollectViewModel(context) }
+    val imageLoader = remember { ApiClient.provideImageLoader(context) }
 
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
     // State for viewing image
-    var viewingImageBase64 by remember { mutableStateOf<String?>(null) }
+    var viewingImageUrl by remember { mutableStateOf<String?>(null) }
 
     Column {
         // Header row — same style as HomeResultStatsSection & LatestNoticesSection
@@ -110,7 +110,7 @@ fun RecentDocumentsSection(
                     viewModel.myDocuments.take(3).forEach { doc ->
                         HomeDocumentCard(
                             document = doc,
-                            onViewDocument = { viewingImageBase64 = doc.imageBase64 }
+                            onViewDocument = { viewingImageUrl = ApiClient.resolveUrl(doc.fileUrl) }
                         )
                     }
                 }
@@ -119,40 +119,26 @@ fun RecentDocumentsSection(
     }
 
     // Image Viewing Dialog (same as CollectDocumentScreen)
-    if (viewingImageBase64 != null) {
+    if (viewingImageUrl != null) {
         Dialog(
-            onDismissRequest = { viewingImageBase64 = null },
+            onDismissRequest = { viewingImageUrl = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { viewingImageBase64 = null },
+                    .clickable { viewingImageUrl = null },
                 contentAlignment = Alignment.Center
             ) {
-                val bitmap = remember(viewingImageBase64) {
-                    try {
-                        val base64String = viewingImageBase64?.substringAfter(",") ?: ""
-                        val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-
-                if (bitmap != null) {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Viewed Document",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                } else {
-                    Text("Failed to load image", color = Color.White)
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(model = viewingImageUrl, imageLoader = imageLoader),
+                    contentDescription = "Viewed Document",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentScale = ContentScale.Fit
+                )
             }
         }
     }

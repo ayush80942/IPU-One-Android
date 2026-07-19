@@ -30,13 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
+import com.ipu.ipuoneapp.core.network.ApiClient
 import com.ipu.ipuoneapp.data.model.document.DocumentResponseDto
 import java.io.File
 import java.text.SimpleDateFormat
@@ -85,7 +83,8 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
     }
 
     // State for viewing image
-    var viewingImageBase64 by remember { mutableStateOf<String?>(null) }
+    var viewingImageUrl by remember { mutableStateOf<String?>(null) }
+    val imageLoader = remember { ApiClient.provideImageLoader(context) }
 
     LazyColumn(
         modifier = Modifier
@@ -193,7 +192,7 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
             items(viewModel.myDocuments) { doc ->
                 DocumentCard(
                     document = doc,
-                    onViewDocument = { viewingImageBase64 = doc.imageBase64 }
+                    onViewDocument = { viewingImageUrl = ApiClient.resolveUrl(doc.fileUrl) }
                 )
             }
         }
@@ -366,40 +365,26 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
     }
     
     // Image Viewing Dialog
-    if (viewingImageBase64 != null) {
+    if (viewingImageUrl != null) {
         Dialog(
-            onDismissRequest = { viewingImageBase64 = null },
+            onDismissRequest = { viewingImageUrl = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { viewingImageBase64 = null },
+                    .clickable { viewingImageUrl = null },
                 contentAlignment = Alignment.Center
             ) {
-                val bitmap = remember(viewingImageBase64) {
-                    try {
-                        val base64String = viewingImageBase64?.substringAfter(",") ?: ""
-                        val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-
-                if (bitmap != null) {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Viewed Document",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                } else {
-                    Text("Failed to load image", color = Color.White)
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(model = viewingImageUrl, imageLoader = imageLoader),
+                    contentDescription = "Viewed Document",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentScale = ContentScale.Fit
+                )
             }
         }
     }
