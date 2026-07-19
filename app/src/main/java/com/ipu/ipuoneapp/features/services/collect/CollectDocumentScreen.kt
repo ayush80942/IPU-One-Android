@@ -36,6 +36,7 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.ipu.ipuoneapp.core.network.ApiClient
 import com.ipu.ipuoneapp.data.model.document.DocumentResponseDto
+import com.ipu.ipuoneapp.data.model.document.displayLabel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -427,11 +428,7 @@ fun DocumentCard(
             // Middle Content
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = document.documentType
-                        .replace("_", " ")
-                        .lowercase()
-                        .split(" ")
-                        .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } },
+                    text = document.displayLabel(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF0F172A) // Dark Navy

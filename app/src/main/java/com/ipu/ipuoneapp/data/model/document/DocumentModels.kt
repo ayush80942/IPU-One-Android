@@ -19,3 +19,21 @@ data class DocumentResponseDto(
     val submittedAt: String,
     val updatedAt: String
 )
+
+/**
+ * Human-readable label for a document card. Plain "Marksheet" is indistinguishable across
+ * semesters, so marksheets get their semester appended — e.g. "Marksheet (Sem 1)".
+ */
+fun DocumentResponseDto.displayLabel(): String {
+    val baseName = documentType
+        .replace("_", " ")
+        .lowercase()
+        .split(" ")
+        .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+
+    return if (documentType == "MARKSHEET" && !semester.isNullOrBlank()) {
+        "$baseName (Sem $semester)"
+    } else {
+        baseName
+    }
+}
