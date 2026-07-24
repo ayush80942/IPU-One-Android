@@ -1,6 +1,5 @@
 package com.ipu.ipuoneapp.features.home.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,14 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import coil.compose.rememberAsyncImagePainter
 import com.ipu.ipuoneapp.core.network.ApiClient
+import com.ipu.ipuoneapp.core.ui.components.DocumentViewerDialog
 import com.ipu.ipuoneapp.data.model.document.DocumentResponseDto
 import com.ipu.ipuoneapp.data.model.document.displayLabel
 import com.ipu.ipuoneapp.features.services.collect.CollectViewModel
@@ -40,8 +36,8 @@ fun RecentDocumentsSection(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    // State for viewing image
-    var viewingImageUrl by remember { mutableStateOf<String?>(null) }
+    // State for viewing/downloading a document
+    var viewingDocument by remember { mutableStateOf<DocumentResponseDto?>(null) }
 
     Column {
         // Header row — same style as HomeResultStatsSection & LatestNoticesSection
@@ -111,7 +107,7 @@ fun RecentDocumentsSection(
                     viewModel.myDocuments.take(3).forEach { doc ->
                         HomeDocumentCard(
                             document = doc,
-                            onViewDocument = { viewingImageUrl = ApiClient.resolveUrl(doc.fileUrl) }
+                            onViewDocument = { viewingDocument = doc }
                         )
                     }
                 }
@@ -119,29 +115,13 @@ fun RecentDocumentsSection(
         }
     }
 
-    // Image Viewing Dialog (same as CollectDocumentScreen)
-    if (viewingImageUrl != null) {
-        Dialog(
-            onDismissRequest = { viewingImageUrl = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { viewingImageUrl = null },
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = viewingImageUrl, imageLoader = imageLoader),
-                    contentDescription = "Viewed Document",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-        }
+    // Document Viewing/Download Dialog
+    viewingDocument?.let { doc ->
+        DocumentViewerDialog(
+            document = doc,
+            imageLoader = imageLoader,
+            onDismiss = { viewingDocument = null }
+        )
     }
 }
 

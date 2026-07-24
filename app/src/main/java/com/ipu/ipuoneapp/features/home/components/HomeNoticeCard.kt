@@ -1,12 +1,7 @@
 package com.ipu.ipuoneapp.features.home.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BusinessCenter
-import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -15,15 +10,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ipu.ipuoneapp.core.ui.components.NoticeBadgePill
+import com.ipu.ipuoneapp.core.ui.components.NoticeCategoryChip
+import com.ipu.ipuoneapp.data.model.notice.categoryColor
+import com.ipu.ipuoneapp.data.model.notice.categoryIcon
 
 @Composable
 fun HomeNoticeCard(
-    badge: String,
+    category: String,
+    badge: String?,
     date: String,
     title: String,
     description: String,
@@ -32,12 +30,7 @@ fun HomeNoticeCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-
-    val isUrgent = badge.uppercase() == "URGENT"
-    val badgeColor = if (isUrgent) colors.primary else Color(0xFF2980B9)
-    val badgeTextColor = Color.White
-    val bottomIconColor = if (isUrgent) colors.primary else Color(0xFF2980B9)
-    val bottomIcon = if (isUrgent) Icons.Default.EventNote else Icons.Default.BusinessCenter
+    val accentColor = category.categoryColor()
 
     Card(
         modifier = modifier
@@ -59,17 +52,12 @@ fun HomeNoticeCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50)) // Pill shape
-                            .background(if (isUrgent) colors.errorContainer else colors.primaryContainer)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = badge.uppercase(),
-                            color = if (isUrgent) colors.onErrorContainer else colors.primary,
-                            style = typography.labelSmall.copy(fontWeight = FontWeight.Bold)
-                        )
+                        NoticeCategoryChip(category = category)
+                        NoticeBadgePill(badge = badge)
                     }
                     Text(
                         text = date,
@@ -89,7 +77,7 @@ fun HomeNoticeCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
@@ -104,9 +92,9 @@ fun HomeNoticeCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = bottomIcon,
+                    imageVector = category.categoryIcon(),
                     contentDescription = null,
-                    tint = bottomIconColor,
+                    tint = accentColor,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -114,7 +102,7 @@ fun HomeNoticeCard(
                     text = bottomLabel,
                     style = typography.labelMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = bottomIconColor
+                        color = accentColor
                     )
                 )
             }

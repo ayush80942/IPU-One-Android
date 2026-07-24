@@ -55,7 +55,7 @@ interface ApiService {
         @Query("category") category: String? = null,
         @Query("search") search: String? = null,
         @Query("page") page: Int = 0,
-        @Query("size") size: Int = 50
+        @Query("size") size: Int = 20
     ): PageResponse<NoticeResponseDto>
 
     @POST("api/documents/collect")

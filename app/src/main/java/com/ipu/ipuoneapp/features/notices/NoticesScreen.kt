@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,11 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.ipu.ipuoneapp.core.ui.components.NoticeBadgePill
+import com.ipu.ipuoneapp.core.ui.components.NoticeCategoryChip
+import com.ipu.ipuoneapp.data.model.notice.NOTICE_CATEGORY_FILTERS
 import com.ipu.ipuoneapp.data.model.notice.NoticeResponseDto
-
-private val FILTERS = listOf("ALL", "EXAM", "SCHOLARSHIP", "INTERNSHIP", "CIRCULAR", "PLACEMENT")
-private val FILTER_LABELS = listOf("All", "Exam", "Scholarship", "Internship", "Circular", "Placement")
 
 @Composable
 fun NoticesScreen() {
@@ -81,14 +79,14 @@ fun NoticesScreen() {
 
             // Category filter chips
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                itemsIndexed(FILTERS) { index, filter ->
-                    val isSelected = state.selectedCategory == filter
+                items(NOTICE_CATEGORY_FILTERS) { (value, label) ->
+                    val isSelected = state.selectedCategory == value
                     FilterChip(
                         selected = isSelected,
-                        onClick = { viewModel.onCategorySelected(filter) },
+                        onClick = { viewModel.onCategorySelected(value) },
                         label = {
                             Text(
-                                text = FILTER_LABELS[index],
+                                text = label,
                                 color = if (isSelected) Color.White else Color.Black,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -260,7 +258,6 @@ fun NoticeCard(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     val isUrgent = notice.badge?.uppercase() == "URGENT"
-    val badgeColor = if (isUrgent) colors.primary else Color(0xFF2980B9)
 
     Column(
         modifier = Modifier
@@ -279,27 +276,12 @@ fun NoticeCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = notice.category.uppercase(),
-                    style = typography.labelMedium
-                )
-                if (notice.badge != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(badgeColor)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = notice.badge.uppercase(),
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                NoticeCategoryChip(category = notice.category)
+                NoticeBadgePill(badge = notice.badge)
             }
             Text(text = notice.date, style = typography.bodySmall)
         }

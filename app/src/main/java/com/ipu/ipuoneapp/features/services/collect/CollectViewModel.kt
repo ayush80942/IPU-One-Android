@@ -104,7 +104,7 @@ class CollectViewModel(private val context: Context) : ViewModel() {
             val byteArray = outputStream.toByteArray()
             
             // Encode
-            val base64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+            val base64 = Base64.encodeToString(byteArray, Base64.NO_WRAP)
             "data:image/jpeg;base64,$base64"
         } catch (e: Exception) {
             e.printStackTrace()

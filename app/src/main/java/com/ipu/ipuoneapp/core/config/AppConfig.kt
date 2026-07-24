@@ -4,7 +4,7 @@ object AppConfig {
     /**
      * The base URL of the backend API.
      */
-    const val BASE_URL = "http://tmsk864q5tetm736i55qlyi0.213.210.37.18.sslip.io/"
+    const val BASE_URL = "https://tmsk864q5tetm736i55qlyi0.213.210.37.18.sslip.io/"
 
     /**
      * Web OAuth client ID used as the audience for native Google Sign-In (Credential Manager).

@@ -31,10 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.ipu.ipuoneapp.core.network.ApiClient
+import com.ipu.ipuoneapp.core.ui.components.DocumentViewerDialog
 import com.ipu.ipuoneapp.data.model.document.DocumentResponseDto
 import com.ipu.ipuoneapp.data.model.document.displayLabel
 import java.io.File
@@ -83,8 +82,8 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
         }
     }
 
-    // State for viewing image
-    var viewingImageUrl by remember { mutableStateOf<String?>(null) }
+    // State for viewing/downloading a document
+    var viewingDocument by remember { mutableStateOf<DocumentResponseDto?>(null) }
     val imageLoader = remember { ApiClient.provideImageLoader(context) }
 
     LazyColumn(
@@ -193,7 +192,7 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
             items(viewModel.myDocuments) { doc ->
                 DocumentCard(
                     document = doc,
-                    onViewDocument = { viewingImageUrl = ApiClient.resolveUrl(doc.fileUrl) }
+                    onViewDocument = { viewingDocument = doc }
                 )
             }
         }
@@ -365,29 +364,13 @@ fun CollectDocumentScreen(onBack: () -> Unit = {}) {
         }
     }
     
-    // Image Viewing Dialog
-    if (viewingImageUrl != null) {
-        Dialog(
-            onDismissRequest = { viewingImageUrl = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { viewingImageUrl = null },
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = viewingImageUrl, imageLoader = imageLoader),
-                    contentDescription = "Viewed Document",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-        }
+    // Document Viewing/Download Dialog
+    viewingDocument?.let { doc ->
+        DocumentViewerDialog(
+            document = doc,
+            imageLoader = imageLoader,
+            onDismiss = { viewingDocument = null }
+        )
     }
 }
 

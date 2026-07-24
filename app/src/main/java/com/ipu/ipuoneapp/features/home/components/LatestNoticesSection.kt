@@ -106,9 +106,9 @@ fun LatestNoticesSection(
                     contentPadding = PaddingValues(end = 8.dp, bottom = 4.dp)
                 ) {
                     items(state.notices.take(6), key = { it.id }) { notice ->
-                        val badgeLabel = notice.badge?.uppercase() ?: notice.category.uppercase()
                         HomeNoticeCard(
-                            badge = badgeLabel,
+                            category = notice.category,
+                            badge = notice.badge,
                             date = notice.date,
                             title = notice.title,
                             description = notice.description,
